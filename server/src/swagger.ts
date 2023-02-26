@@ -1,21 +1,21 @@
-import { DocumentBuilder } from "@nestjs/swagger";
+import { DocumentBuilder, SwaggerCustomOptions } from "@nestjs/swagger";
 
 export const swaggerPath = "api";
 
 export const swaggerDocumentOptions = new DocumentBuilder()
-  .setTitle("tuku")
+  .setTitle("KoncoPro")
   .setDescription(
-    'Sample application for e-commerce\n\n## Congratulations! Your application is ready.\n  \nPlease note that all endpoints are secured with JWT Bearer authentication.\nBy default, your app comes with one user with the username "admin" and password "admin".\nLearn more in [our docs](https://docs.amplication.com)'
+    'Poroperty Business Management App\n\n## Congratulations! Your service resource is ready.\n  \nPlease note that all endpoints are secured with HTTP Basic authentication.\nBy default, your service resource comes with one user with the username "admin" and password "admin".\nLearn more in [our docs](https://docs.amplication.com)'
   )
-  .setVersion("lwim0m3t")
-  .addBearerAuth()
+  .setVersion("s22j37m3")
+  .addBasicAuth()
   .build();
 
-export const swaggerSetupOptions = {
+export const swaggerSetupOptions: SwaggerCustomOptions = {
   swaggerOptions: {
     persistAuthorization: true,
   },
   customCssUrl: "../swagger/swagger.css",
   customfavIcon: "../swagger/favicon.png",
-  customSiteTitle: "tuku",
+  customSiteTitle: "KoncoPro",
 };

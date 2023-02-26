@@ -8,11 +8,12 @@ import "./login.scss";
 
 const CLASS_NAME = "login-page";
 
-const Login = ({ theme }: { theme?: object }) => {
+const Login = ({ theme }: any) => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const login = useLogin();
   const notify = useNotify();
+  const BASE_URI = process.env.REACT_APP_SERVER_URL;
   const submit = (e: any) => {
     e.preventDefault();
     login({ username, password }).catch(() =>
@@ -38,7 +39,7 @@ const Login = ({ theme }: { theme?: object }) => {
               type="button"
               variant="contained"
               color="primary"
-              href="/graphql"
+              href={`${BASE_URI}/graphql`}
             >
               Continue
             </Button>
@@ -93,7 +94,7 @@ const Login = ({ theme }: { theme?: object }) => {
               type="button"
               variant="contained"
               color="primary"
-              href="/api"
+              href={`${BASE_URI}/api`}
             >
               Continue
             </Button>
@@ -103,7 +104,7 @@ const Login = ({ theme }: { theme?: object }) => {
         </div>
         <div className={`${CLASS_NAME}__read-more`}>
           <span>Read </span>
-          <a href="https://docs.amplication.com/docs/api" target="docs">
+          <a href="https://docs.amplication.com/api" target="docs">
             Amplication docs
           </a>
           <span> to learn more</span>
