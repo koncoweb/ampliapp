@@ -1,11 +1,8 @@
 import { UnauthorizedException } from "@nestjs/common";
 import { mock } from "jest-mock-extended";
 import { JwtStrategyBase } from "../../../auth/jwt/base/jwt.strategy.base";
-// @ts-ignore
-// eslint-disable-next-line
-import { UserService } from "../../../user/user.service";
 import { TEST_USER } from "../constants";
-
+import { UserService } from "../../../user/user.service";
 describe("Testing the jwtStrategyBase.validate()", () => {
   const userService = mock<UserService>();
   const jwtStrategy = new JwtStrategyBase(userService, "Secrete");
@@ -19,6 +16,7 @@ describe("Testing the jwtStrategyBase.validate()", () => {
       .mockReturnValue(Promise.resolve(null));
     //ACT
     const result = jwtStrategy.validate({
+      id: TEST_USER.id,
       username: TEST_USER.username,
       roles: TEST_USER.roles,
     });

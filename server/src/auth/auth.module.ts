@@ -5,19 +5,14 @@ import { PassportModule } from "@nestjs/passport";
 import { JWT_EXPIRATION, JWT_SECRET_KEY } from "../constants";
 import { SecretsManagerModule } from "../providers/secrets/secretsManager.module";
 import { SecretsManagerService } from "../providers/secrets/secretsManager.service";
-// @ts-ignore
-// eslint-disable-next-line
-import { UserModule } from "../user/user.module";
 import { AuthController } from "./auth.controller";
 import { AuthResolver } from "./auth.resolver";
 import { AuthService } from "./auth.service";
-import { BasicStrategy } from "./basic/basic.strategy";
 import { JwtStrategy } from "./jwt/jwt.strategy";
 import { jwtSecretFactory } from "./jwt/jwtSecretFactory";
 import { PasswordService } from "./password.service";
-//@ts-ignore
 import { TokenService } from "./token.service";
-
+import { UserModule } from "../user/user.module";
 @Module({
   imports: [
     forwardRef(() => UserModule),
@@ -47,7 +42,6 @@ import { TokenService } from "./token.service";
   ],
   providers: [
     AuthService,
-    BasicStrategy,
     PasswordService,
     AuthResolver,
     JwtStrategy,
