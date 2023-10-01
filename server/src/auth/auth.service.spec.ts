@@ -1,16 +1,10 @@
 import { Test, TestingModule } from "@nestjs/testing";
-// @ts-ignore
-// eslint-disable-next-line
-import { User } from "src/user/base/User";
-// @ts-ignore
-// eslint-disable-next-line
-import { UserService } from "../user/user.service";
 import { AuthService } from "./auth.service";
 import { Credentials } from "./Credentials";
 import { PasswordService } from "./password.service";
-// @ts-ignore
-// eslint-disable-next-line
 import { TokenService } from "./token.service";
+import { VALID_ID } from "../tests/auth/constants";
+import { UserService } from "../user/user.service";
 
 const VALID_CREDENTIALS: Credentials = {
   username: "Valid User",
@@ -24,7 +18,7 @@ const USER: any = {
   ...VALID_CREDENTIALS,
   createdAt: new Date(),
   firstName: "ofek",
-  id: "1",
+  id: VALID_ID,
   lastName: "gabay",
   roles: ["admin"],
   updatedAt: new Date(),
@@ -32,7 +26,7 @@ const USER: any = {
 
 const SIGN_TOKEN = "SIGN_TOKEN";
 
-const userService = {
+const authEntityService = {
   findOne(args: { where: { username: string } }): any | null {
     if (args.where.username === VALID_CREDENTIALS.username) {
       return USER;
@@ -61,7 +55,7 @@ describe("AuthService", () => {
       providers: [
         {
           provide: UserService,
-          useValue: userService,
+          useValue: authEntityService,
         },
         {
           provide: PasswordService,
@@ -92,6 +86,7 @@ describe("AuthService", () => {
       ).resolves.toEqual({
         username: USER.username,
         roles: USER.roles,
+        id: USER.id,
       });
     });
 
@@ -112,6 +107,7 @@ describe("AuthService", () => {
         username: USER.username,
         roles: USER.roles,
         accessToken: SIGN_TOKEN,
+        id: USER.id,
       });
     });
   });

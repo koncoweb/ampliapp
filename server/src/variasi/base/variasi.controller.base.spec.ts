@@ -1,10 +1,18 @@
 import { Test } from "@nestjs/testing";
-import { INestApplication, HttpStatus, ExecutionContext } from "@nestjs/common";
+import {
+  INestApplication,
+  HttpStatus,
+  ExecutionContext,
+  CallHandler,
+} from "@nestjs/common";
 import request from "supertest";
 import { MorganModule } from "nest-morgan";
 import { ACGuard } from "nest-access-control";
 import { DefaultAuthGuard } from "../../auth/defaultAuth.guard";
 import { ACLModule } from "../../auth/acl.module";
+import { AclFilterResponseInterceptor } from "../../interceptors/aclFilterResponse.interceptor";
+import { AclValidateRequestInterceptor } from "../../interceptors/aclValidateRequest.interceptor";
+import { map } from "rxjs";
 import { VariasiController } from "../variasi.controller";
 import { VariasiService } from "../variasi.service";
 
@@ -69,6 +77,21 @@ const acGuard = {
   },
 };
 
+const aclFilterResponseInterceptor = {
+  intercept: (context: ExecutionContext, next: CallHandler) => {
+    return next.handle().pipe(
+      map((data) => {
+        return data;
+      })
+    );
+  },
+};
+const aclValidateRequestInterceptor = {
+  intercept: (context: ExecutionContext, next: CallHandler) => {
+    return next.handle();
+  },
+};
+
 describe("Variasi", () => {
   let app: INestApplication;
 
@@ -87,6 +110,10 @@ describe("Variasi", () => {
       .useValue(basicAuthGuard)
       .overrideGuard(ACGuard)
       .useValue(acGuard)
+      .overrideInterceptor(AclFilterResponseInterceptor)
+      .useValue(aclFilterResponseInterceptor)
+      .overrideInterceptor(AclValidateRequestInterceptor)
+      .useValue(aclValidateRequestInterceptor)
       .compile();
 
     app = moduleRef.createNestApplication();
@@ -137,6 +164,28 @@ describe("Variasi", () => {
         ...FIND_ONE_RESULT,
         createdAt: FIND_ONE_RESULT.createdAt.toISOString(),
         updatedAt: FIND_ONE_RESULT.updatedAt.toISOString(),
+      });
+  });
+
+  test("POST /variasis existing resource", async () => {
+    const agent = request(app.getHttpServer());
+    await agent
+      .post("/variasis")
+      .send(CREATE_INPUT)
+      .expect(HttpStatus.CREATED)
+      .expect({
+        ...CREATE_RESULT,
+        createdAt: CREATE_RESULT.createdAt.toISOString(),
+        updatedAt: CREATE_RESULT.updatedAt.toISOString(),
+      })
+      .then(function () {
+        agent
+          .post("/variasis")
+          .send(CREATE_INPUT)
+          .expect(HttpStatus.CONFLICT)
+          .expect({
+            statusCode: HttpStatus.CONFLICT,
+          });
       });
   });
 
