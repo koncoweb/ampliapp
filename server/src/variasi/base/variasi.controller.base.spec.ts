@@ -6,7 +6,6 @@ import {
   CallHandler,
 } from "@nestjs/common";
 import request from "supertest";
-import { MorganModule } from "nest-morgan";
 import { ACGuard } from "nest-access-control";
 import { DefaultAuthGuard } from "../../auth/defaultAuth.guard";
 import { ACLModule } from "../../auth/acl.module";
@@ -46,11 +45,11 @@ const FIND_ONE_RESULT = {
 };
 
 const service = {
-  create() {
+  createVariasi() {
     return CREATE_RESULT;
   },
-  findMany: () => FIND_MANY_RESULT,
-  findOne: ({ where }: { where: { id: string } }) => {
+  variasis: () => FIND_MANY_RESULT,
+  variasi: ({ where }: { where: { id: string } }) => {
     switch (where.id) {
       case existingId:
         return FIND_ONE_RESULT;
@@ -104,7 +103,7 @@ describe("Variasi", () => {
         },
       ],
       controllers: [VariasiController],
-      imports: [MorganModule.forRoot(), ACLModule],
+      imports: [ACLModule],
     })
       .overrideGuard(DefaultAuthGuard)
       .useValue(basicAuthGuard)

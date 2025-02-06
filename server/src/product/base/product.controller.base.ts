@@ -16,17 +16,12 @@ import * as errors from "../../errors";
 import { Request } from "express";
 import { plainToClass } from "class-transformer";
 import { ApiNestedQuery } from "../../decorators/api-nested-query.decorator";
-import * as nestAccessControl from "nest-access-control";
-import * as defaultAuthGuard from "../../auth/defaultAuth.guard";
 import { ProductService } from "../product.service";
-import { AclValidateRequestInterceptor } from "../../interceptors/aclValidateRequest.interceptor";
-import { AclFilterResponseInterceptor } from "../../interceptors/aclFilterResponse.interceptor";
 import { ProductCreateInput } from "./ProductCreateInput";
-import { ProductWhereInput } from "./ProductWhereInput";
-import { ProductWhereUniqueInput } from "./ProductWhereUniqueInput";
-import { ProductFindManyArgs } from "./ProductFindManyArgs";
-import { ProductUpdateInput } from "./ProductUpdateInput";
 import { Product } from "./Product";
+import { ProductFindManyArgs } from "./ProductFindManyArgs";
+import { ProductWhereUniqueInput } from "./ProductWhereUniqueInput";
+import { ProductUpdateInput } from "./ProductUpdateInput";
 import { OrderFindManyArgs } from "../../order/base/OrderFindManyArgs";
 import { Order } from "../../order/base/Order";
 import { OrderWhereUniqueInput } from "../../order/base/OrderWhereUniqueInput";
@@ -34,26 +29,14 @@ import { VariasiFindManyArgs } from "../../variasi/base/VariasiFindManyArgs";
 import { Variasi } from "../../variasi/base/Variasi";
 import { VariasiWhereUniqueInput } from "../../variasi/base/VariasiWhereUniqueInput";
 
-@swagger.ApiBasicAuth()
-@common.UseGuards(defaultAuthGuard.DefaultAuthGuard, nestAccessControl.ACGuard)
 export class ProductControllerBase {
-  constructor(
-    protected readonly service: ProductService,
-    protected readonly rolesBuilder: nestAccessControl.RolesBuilder
-  ) {}
-  @common.UseInterceptors(AclValidateRequestInterceptor)
+  constructor(protected readonly service: ProductService) {}
   @common.Post()
   @swagger.ApiCreatedResponse({ type: Product })
-  @nestAccessControl.UseRoles({
-    resource: "Product",
-    action: "create",
-    possession: "any",
-  })
-  @swagger.ApiForbiddenResponse({
-    type: errors.ForbiddenException,
-  })
-  async create(@common.Body() data: ProductCreateInput): Promise<Product> {
-    return await this.service.create({
+  async createProduct(
+    @common.Body() data: ProductCreateInput
+  ): Promise<Product> {
+    return await this.service.createProduct({
       data: data,
       select: {
         createdAt: true,
@@ -66,21 +49,12 @@ export class ProductControllerBase {
     });
   }
 
-  @common.UseInterceptors(AclFilterResponseInterceptor)
   @common.Get()
   @swagger.ApiOkResponse({ type: [Product] })
   @ApiNestedQuery(ProductFindManyArgs)
-  @nestAccessControl.UseRoles({
-    resource: "Product",
-    action: "read",
-    possession: "any",
-  })
-  @swagger.ApiForbiddenResponse({
-    type: errors.ForbiddenException,
-  })
-  async findMany(@common.Req() request: Request): Promise<Product[]> {
+  async products(@common.Req() request: Request): Promise<Product[]> {
     const args = plainToClass(ProductFindManyArgs, request.query);
-    return this.service.findMany({
+    return this.service.products({
       ...args,
       select: {
         createdAt: true,
@@ -93,22 +67,13 @@ export class ProductControllerBase {
     });
   }
 
-  @common.UseInterceptors(AclFilterResponseInterceptor)
   @common.Get("/:id")
   @swagger.ApiOkResponse({ type: Product })
   @swagger.ApiNotFoundResponse({ type: errors.NotFoundException })
-  @nestAccessControl.UseRoles({
-    resource: "Product",
-    action: "read",
-    possession: "own",
-  })
-  @swagger.ApiForbiddenResponse({
-    type: errors.ForbiddenException,
-  })
-  async findOne(
+  async product(
     @common.Param() params: ProductWhereUniqueInput
   ): Promise<Product | null> {
-    const result = await this.service.findOne({
+    const result = await this.service.product({
       where: params,
       select: {
         createdAt: true,
@@ -127,24 +92,15 @@ export class ProductControllerBase {
     return result;
   }
 
-  @common.UseInterceptors(AclValidateRequestInterceptor)
   @common.Patch("/:id")
   @swagger.ApiOkResponse({ type: Product })
   @swagger.ApiNotFoundResponse({ type: errors.NotFoundException })
-  @nestAccessControl.UseRoles({
-    resource: "Product",
-    action: "update",
-    possession: "any",
-  })
-  @swagger.ApiForbiddenResponse({
-    type: errors.ForbiddenException,
-  })
-  async update(
+  async updateProduct(
     @common.Param() params: ProductWhereUniqueInput,
     @common.Body() data: ProductUpdateInput
   ): Promise<Product | null> {
     try {
-      return await this.service.update({
+      return await this.service.updateProduct({
         where: params,
         data: data,
         select: {
@@ -169,19 +125,11 @@ export class ProductControllerBase {
   @common.Delete("/:id")
   @swagger.ApiOkResponse({ type: Product })
   @swagger.ApiNotFoundResponse({ type: errors.NotFoundException })
-  @nestAccessControl.UseRoles({
-    resource: "Product",
-    action: "delete",
-    possession: "any",
-  })
-  @swagger.ApiForbiddenResponse({
-    type: errors.ForbiddenException,
-  })
-  async delete(
+  async deleteProduct(
     @common.Param() params: ProductWhereUniqueInput
   ): Promise<Product | null> {
     try {
-      return await this.service.delete({
+      return await this.service.deleteProduct({
         where: params,
         select: {
           createdAt: true,
@@ -202,15 +150,9 @@ export class ProductControllerBase {
     }
   }
 
-  @common.UseInterceptors(AclFilterResponseInterceptor)
   @common.Get("/:id/orders")
   @ApiNestedQuery(OrderFindManyArgs)
-  @nestAccessControl.UseRoles({
-    resource: "Order",
-    action: "read",
-    possession: "any",
-  })
-  async findManyOrders(
+  async findOrders(
     @common.Req() request: Request,
     @common.Param() params: ProductWhereUniqueInput
   ): Promise<Order[]> {
@@ -249,11 +191,6 @@ export class ProductControllerBase {
   }
 
   @common.Post("/:id/orders")
-  @nestAccessControl.UseRoles({
-    resource: "Product",
-    action: "update",
-    possession: "any",
-  })
   async connectOrders(
     @common.Param() params: ProductWhereUniqueInput,
     @common.Body() body: OrderWhereUniqueInput[]
@@ -263,7 +200,7 @@ export class ProductControllerBase {
         connect: body,
       },
     };
-    await this.service.update({
+    await this.service.updateProduct({
       where: params,
       data,
       select: { id: true },
@@ -271,11 +208,6 @@ export class ProductControllerBase {
   }
 
   @common.Patch("/:id/orders")
-  @nestAccessControl.UseRoles({
-    resource: "Product",
-    action: "update",
-    possession: "any",
-  })
   async updateOrders(
     @common.Param() params: ProductWhereUniqueInput,
     @common.Body() body: OrderWhereUniqueInput[]
@@ -285,7 +217,7 @@ export class ProductControllerBase {
         set: body,
       },
     };
-    await this.service.update({
+    await this.service.updateProduct({
       where: params,
       data,
       select: { id: true },
@@ -293,11 +225,6 @@ export class ProductControllerBase {
   }
 
   @common.Delete("/:id/orders")
-  @nestAccessControl.UseRoles({
-    resource: "Product",
-    action: "update",
-    possession: "any",
-  })
   async disconnectOrders(
     @common.Param() params: ProductWhereUniqueInput,
     @common.Body() body: OrderWhereUniqueInput[]
@@ -307,22 +234,16 @@ export class ProductControllerBase {
         disconnect: body,
       },
     };
-    await this.service.update({
+    await this.service.updateProduct({
       where: params,
       data,
       select: { id: true },
     });
   }
 
-  @common.UseInterceptors(AclFilterResponseInterceptor)
   @common.Get("/:id/variasi")
   @ApiNestedQuery(VariasiFindManyArgs)
-  @nestAccessControl.UseRoles({
-    resource: "Variasi",
-    action: "read",
-    possession: "any",
-  })
-  async findManyVariasi(
+  async findVariasi(
     @common.Req() request: Request,
     @common.Param() params: ProductWhereUniqueInput
   ): Promise<Variasi[]> {
@@ -345,11 +266,6 @@ export class ProductControllerBase {
   }
 
   @common.Post("/:id/variasi")
-  @nestAccessControl.UseRoles({
-    resource: "Product",
-    action: "update",
-    possession: "any",
-  })
   async connectVariasi(
     @common.Param() params: ProductWhereUniqueInput,
     @common.Body() body: VariasiWhereUniqueInput[]
@@ -359,7 +275,7 @@ export class ProductControllerBase {
         connect: body,
       },
     };
-    await this.service.update({
+    await this.service.updateProduct({
       where: params,
       data,
       select: { id: true },
@@ -367,11 +283,6 @@ export class ProductControllerBase {
   }
 
   @common.Patch("/:id/variasi")
-  @nestAccessControl.UseRoles({
-    resource: "Product",
-    action: "update",
-    possession: "any",
-  })
   async updateVariasi(
     @common.Param() params: ProductWhereUniqueInput,
     @common.Body() body: VariasiWhereUniqueInput[]
@@ -381,7 +292,7 @@ export class ProductControllerBase {
         set: body,
       },
     };
-    await this.service.update({
+    await this.service.updateProduct({
       where: params,
       data,
       select: { id: true },
@@ -389,11 +300,6 @@ export class ProductControllerBase {
   }
 
   @common.Delete("/:id/variasi")
-  @nestAccessControl.UseRoles({
-    resource: "Product",
-    action: "update",
-    possession: "any",
-  })
   async disconnectVariasi(
     @common.Param() params: ProductWhereUniqueInput,
     @common.Body() body: VariasiWhereUniqueInput[]
@@ -403,7 +309,7 @@ export class ProductControllerBase {
         disconnect: body,
       },
     };
-    await this.service.update({
+    await this.service.updateProduct({
       where: params,
       data,
       select: { id: true },

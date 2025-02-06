@@ -10,39 +10,23 @@ https://docs.amplication.com/how-to/custom-code
 ------------------------------------------------------------------------------
   */
 import * as graphql from "@nestjs/graphql";
-import * as apollo from "apollo-server-express";
+import { GraphQLError } from "graphql";
 import { isRecordNotFoundError } from "../../prisma.util";
 import { MetaQueryPayload } from "../../util/MetaQueryPayload";
-import * as nestAccessControl from "nest-access-control";
-import * as gqlACGuard from "../../auth/gqlAC.guard";
-import { GqlDefaultAuthGuard } from "../../auth/gqlDefaultAuth.guard";
-import * as common from "@nestjs/common";
-import { AclFilterResponseInterceptor } from "../../interceptors/aclFilterResponse.interceptor";
-import { AclValidateRequestInterceptor } from "../../interceptors/aclValidateRequest.interceptor";
-import { CreateOrderArgs } from "./CreateOrderArgs";
-import { UpdateOrderArgs } from "./UpdateOrderArgs";
-import { DeleteOrderArgs } from "./DeleteOrderArgs";
+import { Order } from "./Order";
 import { OrderCountArgs } from "./OrderCountArgs";
 import { OrderFindManyArgs } from "./OrderFindManyArgs";
 import { OrderFindUniqueArgs } from "./OrderFindUniqueArgs";
-import { Order } from "./Order";
+import { CreateOrderArgs } from "./CreateOrderArgs";
+import { UpdateOrderArgs } from "./UpdateOrderArgs";
+import { DeleteOrderArgs } from "./DeleteOrderArgs";
 import { Customer } from "../../customer/base/Customer";
 import { Product } from "../../product/base/Product";
 import { OrderService } from "../order.service";
-@common.UseGuards(GqlDefaultAuthGuard, gqlACGuard.GqlACGuard)
 @graphql.Resolver(() => Order)
 export class OrderResolverBase {
-  constructor(
-    protected readonly service: OrderService,
-    protected readonly rolesBuilder: nestAccessControl.RolesBuilder
-  ) {}
+  constructor(protected readonly service: OrderService) {}
 
-  @graphql.Query(() => MetaQueryPayload)
-  @nestAccessControl.UseRoles({
-    resource: "Order",
-    action: "read",
-    possession: "any",
-  })
   async _ordersMeta(
     @graphql.Args() args: OrderCountArgs
   ): Promise<MetaQueryPayload> {
@@ -52,43 +36,25 @@ export class OrderResolverBase {
     };
   }
 
-  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.Query(() => [Order])
-  @nestAccessControl.UseRoles({
-    resource: "Order",
-    action: "read",
-    possession: "any",
-  })
   async orders(@graphql.Args() args: OrderFindManyArgs): Promise<Order[]> {
-    return this.service.findMany(args);
+    return this.service.orders(args);
   }
 
-  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.Query(() => Order, { nullable: true })
-  @nestAccessControl.UseRoles({
-    resource: "Order",
-    action: "read",
-    possession: "own",
-  })
   async order(
     @graphql.Args() args: OrderFindUniqueArgs
   ): Promise<Order | null> {
-    const result = await this.service.findOne(args);
+    const result = await this.service.order(args);
     if (result === null) {
       return null;
     }
     return result;
   }
 
-  @common.UseInterceptors(AclValidateRequestInterceptor)
   @graphql.Mutation(() => Order)
-  @nestAccessControl.UseRoles({
-    resource: "Order",
-    action: "create",
-    possession: "any",
-  })
   async createOrder(@graphql.Args() args: CreateOrderArgs): Promise<Order> {
-    return await this.service.create({
+    return await this.service.createOrder({
       ...args,
       data: {
         ...args.data,
@@ -108,18 +74,12 @@ export class OrderResolverBase {
     });
   }
 
-  @common.UseInterceptors(AclValidateRequestInterceptor)
   @graphql.Mutation(() => Order)
-  @nestAccessControl.UseRoles({
-    resource: "Order",
-    action: "update",
-    possession: "any",
-  })
   async updateOrder(
     @graphql.Args() args: UpdateOrderArgs
   ): Promise<Order | null> {
     try {
-      return await this.service.update({
+      return await this.service.updateOrder({
         ...args,
         data: {
           ...args.data,
@@ -139,7 +99,7 @@ export class OrderResolverBase {
       });
     } catch (error) {
       if (isRecordNotFoundError(error)) {
-        throw new apollo.ApolloError(
+        throw new GraphQLError(
           `No resource was found for ${JSON.stringify(args.where)}`
         );
       }
@@ -148,19 +108,14 @@ export class OrderResolverBase {
   }
 
   @graphql.Mutation(() => Order)
-  @nestAccessControl.UseRoles({
-    resource: "Order",
-    action: "delete",
-    possession: "any",
-  })
   async deleteOrder(
     @graphql.Args() args: DeleteOrderArgs
   ): Promise<Order | null> {
     try {
-      return await this.service.delete(args);
+      return await this.service.deleteOrder(args);
     } catch (error) {
       if (isRecordNotFoundError(error)) {
-        throw new apollo.ApolloError(
+        throw new GraphQLError(
           `No resource was found for ${JSON.stringify(args.where)}`
         );
       }
@@ -168,19 +123,11 @@ export class OrderResolverBase {
     }
   }
 
-  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.ResolveField(() => Customer, {
     nullable: true,
     name: "customer",
   })
-  @nestAccessControl.UseRoles({
-    resource: "Customer",
-    action: "read",
-    possession: "any",
-  })
-  async resolveFieldCustomer(
-    @graphql.Parent() parent: Order
-  ): Promise<Customer | null> {
+  async getCustomer(@graphql.Parent() parent: Order): Promise<Customer | null> {
     const result = await this.service.getCustomer(parent.id);
 
     if (!result) {
@@ -189,19 +136,11 @@ export class OrderResolverBase {
     return result;
   }
 
-  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.ResolveField(() => Product, {
     nullable: true,
     name: "product",
   })
-  @nestAccessControl.UseRoles({
-    resource: "Product",
-    action: "read",
-    possession: "any",
-  })
-  async resolveFieldProduct(
-    @graphql.Parent() parent: Order
-  ): Promise<Product | null> {
+  async getProduct(@graphql.Parent() parent: Order): Promise<Product | null> {
     const result = await this.service.getProduct(parent.id);
 
     if (!result) {

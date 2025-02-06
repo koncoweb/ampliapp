@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Admin, DataProvider, Resource } from "react-admin";
-import buildGraphQLProvider from "./data-provider/graphqlDataProvider";
+import dataProvider from "./data-provider/graphqlDataProvider";
 import { theme } from "./theme/theme";
 import Login from "./Login";
 import "./App.scss";
@@ -29,28 +29,15 @@ import { VariasiList } from "./variasi/VariasiList";
 import { VariasiCreate } from "./variasi/VariasiCreate";
 import { VariasiEdit } from "./variasi/VariasiEdit";
 import { VariasiShow } from "./variasi/VariasiShow";
-import { jwtAuthProvider } from "./auth-provider/ra-auth-jwt";
+import { httpAuthProvider } from "./auth-provider/ra-auth-http";
 
 const App = (): React.ReactElement => {
-  const [dataProvider, setDataProvider] = useState<DataProvider | null>(null);
-  useEffect(() => {
-    buildGraphQLProvider
-      .then((provider: any) => {
-        setDataProvider(() => provider);
-      })
-      .catch((error: any) => {
-        console.log(error);
-      });
-  }, []);
-  if (!dataProvider) {
-    return <div>Loading</div>;
-  }
   return (
     <div className="App">
       <Admin
         title={"KoncoPro"}
         dataProvider={dataProvider}
-        authProvider={jwtAuthProvider}
+        authProvider={httpAuthProvider}
         theme={theme}
         dashboard={Dashboard}
         loginPage={Login}

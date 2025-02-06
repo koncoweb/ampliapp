@@ -16,6 +16,8 @@ import {
   ValidateNested,
   IsOptional,
   IsNumber,
+  Min,
+  Max,
   IsString,
   IsInt,
 } from "class-validator";
@@ -47,6 +49,8 @@ class Order {
     type: Number,
   })
   @IsNumber()
+  @Min(-999999999)
+  @Max(999999999)
   @IsOptional()
   @Field(() => Number, {
     nullable: true,
@@ -75,6 +79,8 @@ class Order {
     type: Number,
   })
   @IsInt()
+  @Min(-999999999)
+  @Max(999999999)
   @IsOptional()
   @Field(() => Number, {
     nullable: true,
@@ -86,6 +92,8 @@ class Order {
     type: Number,
   })
   @IsInt()
+  @Min(-999999999)
+  @Max(999999999)
   @IsOptional()
   @Field(() => Number, {
     nullable: true,

@@ -11,7 +11,12 @@ https://docs.amplication.com/how-to/custom-code
   */
 import { InputType, Field } from "@nestjs/graphql";
 import { ApiProperty } from "@nestjs/swagger";
-import { IsString, IsOptional, ValidateNested } from "class-validator";
+import {
+  IsString,
+  MaxLength,
+  IsOptional,
+  ValidateNested,
+} from "class-validator";
 import { ProductCreateNestedManyWithoutVariasisInput } from "./ProductCreateNestedManyWithoutVariasisInput";
 import { Type } from "class-transformer";
 
@@ -22,6 +27,7 @@ class VariasiCreateInput {
     type: String,
   })
   @IsString()
+  @MaxLength(100000)
   @IsOptional()
   @Field(() => String, {
     nullable: true,

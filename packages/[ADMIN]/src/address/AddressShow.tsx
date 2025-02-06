@@ -30,7 +30,7 @@ export const AddressShow = (props: ShowProps): React.ReactElement => {
           target="addressId"
           label="Customers"
         >
-          <Datagrid rowClick="show">
+          <Datagrid rowClick="show" bulkActionButtons={false}>
             <ReferenceField
               label="Address"
               source="address.id"
