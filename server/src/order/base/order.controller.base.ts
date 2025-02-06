@@ -16,38 +16,19 @@ import * as errors from "../../errors";
 import { Request } from "express";
 import { plainToClass } from "class-transformer";
 import { ApiNestedQuery } from "../../decorators/api-nested-query.decorator";
-import * as nestAccessControl from "nest-access-control";
-import * as defaultAuthGuard from "../../auth/defaultAuth.guard";
 import { OrderService } from "../order.service";
-import { AclValidateRequestInterceptor } from "../../interceptors/aclValidateRequest.interceptor";
-import { AclFilterResponseInterceptor } from "../../interceptors/aclFilterResponse.interceptor";
 import { OrderCreateInput } from "./OrderCreateInput";
-import { OrderWhereInput } from "./OrderWhereInput";
-import { OrderWhereUniqueInput } from "./OrderWhereUniqueInput";
-import { OrderFindManyArgs } from "./OrderFindManyArgs";
-import { OrderUpdateInput } from "./OrderUpdateInput";
 import { Order } from "./Order";
+import { OrderFindManyArgs } from "./OrderFindManyArgs";
+import { OrderWhereUniqueInput } from "./OrderWhereUniqueInput";
+import { OrderUpdateInput } from "./OrderUpdateInput";
 
-@swagger.ApiBasicAuth()
-@common.UseGuards(defaultAuthGuard.DefaultAuthGuard, nestAccessControl.ACGuard)
 export class OrderControllerBase {
-  constructor(
-    protected readonly service: OrderService,
-    protected readonly rolesBuilder: nestAccessControl.RolesBuilder
-  ) {}
-  @common.UseInterceptors(AclValidateRequestInterceptor)
+  constructor(protected readonly service: OrderService) {}
   @common.Post()
   @swagger.ApiCreatedResponse({ type: Order })
-  @nestAccessControl.UseRoles({
-    resource: "Order",
-    action: "create",
-    possession: "any",
-  })
-  @swagger.ApiForbiddenResponse({
-    type: errors.ForbiddenException,
-  })
-  async create(@common.Body() data: OrderCreateInput): Promise<Order> {
-    return await this.service.create({
+  async createOrder(@common.Body() data: OrderCreateInput): Promise<Order> {
+    return await this.service.createOrder({
       data: {
         ...data,
 
@@ -88,21 +69,12 @@ export class OrderControllerBase {
     });
   }
 
-  @common.UseInterceptors(AclFilterResponseInterceptor)
   @common.Get()
   @swagger.ApiOkResponse({ type: [Order] })
   @ApiNestedQuery(OrderFindManyArgs)
-  @nestAccessControl.UseRoles({
-    resource: "Order",
-    action: "read",
-    possession: "any",
-  })
-  @swagger.ApiForbiddenResponse({
-    type: errors.ForbiddenException,
-  })
-  async findMany(@common.Req() request: Request): Promise<Order[]> {
+  async orders(@common.Req() request: Request): Promise<Order[]> {
     const args = plainToClass(OrderFindManyArgs, request.query);
-    return this.service.findMany({
+    return this.service.orders({
       ...args,
       select: {
         createdAt: true,
@@ -129,22 +101,13 @@ export class OrderControllerBase {
     });
   }
 
-  @common.UseInterceptors(AclFilterResponseInterceptor)
   @common.Get("/:id")
   @swagger.ApiOkResponse({ type: Order })
   @swagger.ApiNotFoundResponse({ type: errors.NotFoundException })
-  @nestAccessControl.UseRoles({
-    resource: "Order",
-    action: "read",
-    possession: "own",
-  })
-  @swagger.ApiForbiddenResponse({
-    type: errors.ForbiddenException,
-  })
-  async findOne(
+  async order(
     @common.Param() params: OrderWhereUniqueInput
   ): Promise<Order | null> {
-    const result = await this.service.findOne({
+    const result = await this.service.order({
       where: params,
       select: {
         createdAt: true,
@@ -177,24 +140,15 @@ export class OrderControllerBase {
     return result;
   }
 
-  @common.UseInterceptors(AclValidateRequestInterceptor)
   @common.Patch("/:id")
   @swagger.ApiOkResponse({ type: Order })
   @swagger.ApiNotFoundResponse({ type: errors.NotFoundException })
-  @nestAccessControl.UseRoles({
-    resource: "Order",
-    action: "update",
-    possession: "any",
-  })
-  @swagger.ApiForbiddenResponse({
-    type: errors.ForbiddenException,
-  })
-  async update(
+  async updateOrder(
     @common.Param() params: OrderWhereUniqueInput,
     @common.Body() data: OrderUpdateInput
   ): Promise<Order | null> {
     try {
-      return await this.service.update({
+      return await this.service.updateOrder({
         where: params,
         data: {
           ...data,
@@ -247,19 +201,11 @@ export class OrderControllerBase {
   @common.Delete("/:id")
   @swagger.ApiOkResponse({ type: Order })
   @swagger.ApiNotFoundResponse({ type: errors.NotFoundException })
-  @nestAccessControl.UseRoles({
-    resource: "Order",
-    action: "delete",
-    possession: "any",
-  })
-  @swagger.ApiForbiddenResponse({
-    type: errors.ForbiddenException,
-  })
-  async delete(
+  async deleteOrder(
     @common.Param() params: OrderWhereUniqueInput
   ): Promise<Order | null> {
     try {
-      return await this.service.delete({
+      return await this.service.deleteOrder({
         where: params,
         select: {
           createdAt: true,

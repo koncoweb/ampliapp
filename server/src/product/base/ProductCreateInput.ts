@@ -13,8 +13,11 @@ import { InputType, Field } from "@nestjs/graphql";
 import { ApiProperty } from "@nestjs/swagger";
 import {
   IsString,
+  MaxLength,
   IsOptional,
   IsNumber,
+  Min,
+  Max,
   ValidateNested,
 } from "class-validator";
 import { OrderCreateNestedManyWithoutProductsInput } from "./OrderCreateNestedManyWithoutProductsInput";
@@ -28,6 +31,7 @@ class ProductCreateInput {
     type: String,
   })
   @IsString()
+  @MaxLength(1000)
   @IsOptional()
   @Field(() => String, {
     nullable: true,
@@ -39,6 +43,8 @@ class ProductCreateInput {
     type: Number,
   })
   @IsNumber()
+  @Min(-999999999)
+  @Max(999999999)
   @IsOptional()
   @Field(() => Number, {
     nullable: true,
@@ -50,6 +56,7 @@ class ProductCreateInput {
     type: String,
   })
   @IsString()
+  @MaxLength(1000)
   @IsOptional()
   @Field(() => String, {
     nullable: true,

@@ -10,47 +10,43 @@ https://docs.amplication.com/how-to/custom-code
 ------------------------------------------------------------------------------
   */
 import { PrismaService } from "../../prisma/prisma.service";
-import { Prisma, Product, Order, Variasi } from "@prisma/client";
+
+import {
+  Prisma,
+  Product as PrismaProduct,
+  Order as PrismaOrder,
+  Variasi as PrismaVariasi,
+} from "@prisma/client";
 
 export class ProductServiceBase {
   constructor(protected readonly prisma: PrismaService) {}
 
-  async count<T extends Prisma.ProductCountArgs>(
-    args: Prisma.SelectSubset<T, Prisma.ProductCountArgs>
-  ): Promise<number> {
+  async count(args: Omit<Prisma.ProductCountArgs, "select">): Promise<number> {
     return this.prisma.product.count(args);
   }
 
-  async findMany<T extends Prisma.ProductFindManyArgs>(
-    args: Prisma.SelectSubset<T, Prisma.ProductFindManyArgs>
-  ): Promise<Product[]> {
+  async products(args: Prisma.ProductFindManyArgs): Promise<PrismaProduct[]> {
     return this.prisma.product.findMany(args);
   }
-  async findOne<T extends Prisma.ProductFindUniqueArgs>(
-    args: Prisma.SelectSubset<T, Prisma.ProductFindUniqueArgs>
-  ): Promise<Product | null> {
+  async product(
+    args: Prisma.ProductFindUniqueArgs
+  ): Promise<PrismaProduct | null> {
     return this.prisma.product.findUnique(args);
   }
-  async create<T extends Prisma.ProductCreateArgs>(
-    args: Prisma.SelectSubset<T, Prisma.ProductCreateArgs>
-  ): Promise<Product> {
-    return this.prisma.product.create<T>(args);
+  async createProduct(args: Prisma.ProductCreateArgs): Promise<PrismaProduct> {
+    return this.prisma.product.create(args);
   }
-  async update<T extends Prisma.ProductUpdateArgs>(
-    args: Prisma.SelectSubset<T, Prisma.ProductUpdateArgs>
-  ): Promise<Product> {
-    return this.prisma.product.update<T>(args);
+  async updateProduct(args: Prisma.ProductUpdateArgs): Promise<PrismaProduct> {
+    return this.prisma.product.update(args);
   }
-  async delete<T extends Prisma.ProductDeleteArgs>(
-    args: Prisma.SelectSubset<T, Prisma.ProductDeleteArgs>
-  ): Promise<Product> {
+  async deleteProduct(args: Prisma.ProductDeleteArgs): Promise<PrismaProduct> {
     return this.prisma.product.delete(args);
   }
 
   async findOrders(
     parentId: string,
     args: Prisma.OrderFindManyArgs
-  ): Promise<Order[]> {
+  ): Promise<PrismaOrder[]> {
     return this.prisma.product
       .findUniqueOrThrow({
         where: { id: parentId },
@@ -61,7 +57,7 @@ export class ProductServiceBase {
   async findVariasi(
     parentId: string,
     args: Prisma.VariasiFindManyArgs
-  ): Promise<Variasi[]> {
+  ): Promise<PrismaVariasi[]> {
     return this.prisma.product
       .findUniqueOrThrow({
         where: { id: parentId },

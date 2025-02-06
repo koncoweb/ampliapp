@@ -34,7 +34,7 @@ export const CustomerShow = (props: ShowProps): React.ReactElement => {
           target="customerId"
           label="Orders"
         >
-          <Datagrid rowClick="show">
+          <Datagrid rowClick="show" bulkActionButtons={false}>
             <DateField source="createdAt" label="Created At" />
             <ReferenceField
               label="Customer"

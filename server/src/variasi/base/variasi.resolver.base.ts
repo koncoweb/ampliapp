@@ -10,39 +10,23 @@ https://docs.amplication.com/how-to/custom-code
 ------------------------------------------------------------------------------
   */
 import * as graphql from "@nestjs/graphql";
-import * as apollo from "apollo-server-express";
+import { GraphQLError } from "graphql";
 import { isRecordNotFoundError } from "../../prisma.util";
 import { MetaQueryPayload } from "../../util/MetaQueryPayload";
-import * as nestAccessControl from "nest-access-control";
-import * as gqlACGuard from "../../auth/gqlAC.guard";
-import { GqlDefaultAuthGuard } from "../../auth/gqlDefaultAuth.guard";
-import * as common from "@nestjs/common";
-import { AclFilterResponseInterceptor } from "../../interceptors/aclFilterResponse.interceptor";
-import { AclValidateRequestInterceptor } from "../../interceptors/aclValidateRequest.interceptor";
-import { CreateVariasiArgs } from "./CreateVariasiArgs";
-import { UpdateVariasiArgs } from "./UpdateVariasiArgs";
-import { DeleteVariasiArgs } from "./DeleteVariasiArgs";
+import { Variasi } from "./Variasi";
 import { VariasiCountArgs } from "./VariasiCountArgs";
 import { VariasiFindManyArgs } from "./VariasiFindManyArgs";
 import { VariasiFindUniqueArgs } from "./VariasiFindUniqueArgs";
-import { Variasi } from "./Variasi";
+import { CreateVariasiArgs } from "./CreateVariasiArgs";
+import { UpdateVariasiArgs } from "./UpdateVariasiArgs";
+import { DeleteVariasiArgs } from "./DeleteVariasiArgs";
 import { ProductFindManyArgs } from "../../product/base/ProductFindManyArgs";
 import { Product } from "../../product/base/Product";
 import { VariasiService } from "../variasi.service";
-@common.UseGuards(GqlDefaultAuthGuard, gqlACGuard.GqlACGuard)
 @graphql.Resolver(() => Variasi)
 export class VariasiResolverBase {
-  constructor(
-    protected readonly service: VariasiService,
-    protected readonly rolesBuilder: nestAccessControl.RolesBuilder
-  ) {}
+  constructor(protected readonly service: VariasiService) {}
 
-  @graphql.Query(() => MetaQueryPayload)
-  @nestAccessControl.UseRoles({
-    resource: "Variasi",
-    action: "read",
-    possession: "any",
-  })
   async _variasisMeta(
     @graphql.Args() args: VariasiCountArgs
   ): Promise<MetaQueryPayload> {
@@ -52,70 +36,46 @@ export class VariasiResolverBase {
     };
   }
 
-  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.Query(() => [Variasi])
-  @nestAccessControl.UseRoles({
-    resource: "Variasi",
-    action: "read",
-    possession: "any",
-  })
   async variasis(
     @graphql.Args() args: VariasiFindManyArgs
   ): Promise<Variasi[]> {
-    return this.service.findMany(args);
+    return this.service.variasis(args);
   }
 
-  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.Query(() => Variasi, { nullable: true })
-  @nestAccessControl.UseRoles({
-    resource: "Variasi",
-    action: "read",
-    possession: "own",
-  })
   async variasi(
     @graphql.Args() args: VariasiFindUniqueArgs
   ): Promise<Variasi | null> {
-    const result = await this.service.findOne(args);
+    const result = await this.service.variasi(args);
     if (result === null) {
       return null;
     }
     return result;
   }
 
-  @common.UseInterceptors(AclValidateRequestInterceptor)
   @graphql.Mutation(() => Variasi)
-  @nestAccessControl.UseRoles({
-    resource: "Variasi",
-    action: "create",
-    possession: "any",
-  })
   async createVariasi(
     @graphql.Args() args: CreateVariasiArgs
   ): Promise<Variasi> {
-    return await this.service.create({
+    return await this.service.createVariasi({
       ...args,
       data: args.data,
     });
   }
 
-  @common.UseInterceptors(AclValidateRequestInterceptor)
   @graphql.Mutation(() => Variasi)
-  @nestAccessControl.UseRoles({
-    resource: "Variasi",
-    action: "update",
-    possession: "any",
-  })
   async updateVariasi(
     @graphql.Args() args: UpdateVariasiArgs
   ): Promise<Variasi | null> {
     try {
-      return await this.service.update({
+      return await this.service.updateVariasi({
         ...args,
         data: args.data,
       });
     } catch (error) {
       if (isRecordNotFoundError(error)) {
-        throw new apollo.ApolloError(
+        throw new GraphQLError(
           `No resource was found for ${JSON.stringify(args.where)}`
         );
       }
@@ -124,19 +84,14 @@ export class VariasiResolverBase {
   }
 
   @graphql.Mutation(() => Variasi)
-  @nestAccessControl.UseRoles({
-    resource: "Variasi",
-    action: "delete",
-    possession: "any",
-  })
   async deleteVariasi(
     @graphql.Args() args: DeleteVariasiArgs
   ): Promise<Variasi | null> {
     try {
-      return await this.service.delete(args);
+      return await this.service.deleteVariasi(args);
     } catch (error) {
       if (isRecordNotFoundError(error)) {
-        throw new apollo.ApolloError(
+        throw new GraphQLError(
           `No resource was found for ${JSON.stringify(args.where)}`
         );
       }
@@ -144,14 +99,8 @@ export class VariasiResolverBase {
     }
   }
 
-  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.ResolveField(() => [Product], { name: "products" })
-  @nestAccessControl.UseRoles({
-    resource: "Product",
-    action: "read",
-    possession: "any",
-  })
-  async resolveFieldProducts(
+  async findProducts(
     @graphql.Parent() parent: Variasi,
     @graphql.Args() args: ProductFindManyArgs
   ): Promise<Product[]> {

@@ -11,7 +11,15 @@ https://docs.amplication.com/how-to/custom-code
   */
 import { InputType, Field } from "@nestjs/graphql";
 import { ApiProperty } from "@nestjs/swagger";
-import { IsString, IsOptional, ValidateNested, IsInt } from "class-validator";
+import {
+  IsString,
+  MaxLength,
+  IsOptional,
+  ValidateNested,
+  IsInt,
+  Min,
+  Max,
+} from "class-validator";
 import { CustomerCreateNestedManyWithoutAddressesInput } from "./CustomerCreateNestedManyWithoutAddressesInput";
 import { Type } from "class-transformer";
 
@@ -22,6 +30,7 @@ class AddressCreateInput {
     type: String,
   })
   @IsString()
+  @MaxLength(1000)
   @IsOptional()
   @Field(() => String, {
     nullable: true,
@@ -33,6 +42,7 @@ class AddressCreateInput {
     type: String,
   })
   @IsString()
+  @MaxLength(1000)
   @IsOptional()
   @Field(() => String, {
     nullable: true,
@@ -44,6 +54,7 @@ class AddressCreateInput {
     type: String,
   })
   @IsString()
+  @MaxLength(1000)
   @IsOptional()
   @Field(() => String, {
     nullable: true,
@@ -67,6 +78,7 @@ class AddressCreateInput {
     type: String,
   })
   @IsString()
+  @MaxLength(1000)
   @IsOptional()
   @Field(() => String, {
     nullable: true,
@@ -78,6 +90,8 @@ class AddressCreateInput {
     type: Number,
   })
   @IsInt()
+  @Min(-999999999)
+  @Max(999999999)
   @IsOptional()
   @Field(() => Number, {
     nullable: true,

@@ -16,13 +16,12 @@ export const VariasiCreate = (props: CreateProps): React.ReactElement => {
     <Create {...props}>
       <SimpleForm>
         <TextInput label="gambar" source="gambar" />
-        <ReferenceArrayInput
-          source="products"
-          reference="Product"
-          parse={(value: any) => value && value.map((v: any) => ({ id: v }))}
-          format={(value: any) => value && value.map((v: any) => v.id)}
-        >
-          <SelectArrayInput optionText={ProductTitle} />
+        <ReferenceArrayInput source="products" reference="Product">
+          <SelectArrayInput
+            optionText={ProductTitle}
+            parse={(value: any) => value && value.map((v: any) => ({ id: v }))}
+            format={(value: any) => value && value.map((v: any) => v.id)}
+          />
         </ReferenceArrayInput>
       </SimpleForm>
     </Create>

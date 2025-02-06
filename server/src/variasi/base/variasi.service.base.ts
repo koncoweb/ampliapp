@@ -10,47 +10,41 @@ https://docs.amplication.com/how-to/custom-code
 ------------------------------------------------------------------------------
   */
 import { PrismaService } from "../../prisma/prisma.service";
-import { Prisma, Variasi, Product } from "@prisma/client";
+import {
+  Prisma,
+  Variasi as PrismaVariasi,
+  Product as PrismaProduct,
+} from "@prisma/client";
 
 export class VariasiServiceBase {
   constructor(protected readonly prisma: PrismaService) {}
 
-  async count<T extends Prisma.VariasiCountArgs>(
-    args: Prisma.SelectSubset<T, Prisma.VariasiCountArgs>
-  ): Promise<number> {
+  async count(args: Omit<Prisma.VariasiCountArgs, "select">): Promise<number> {
     return this.prisma.variasi.count(args);
   }
 
-  async findMany<T extends Prisma.VariasiFindManyArgs>(
-    args: Prisma.SelectSubset<T, Prisma.VariasiFindManyArgs>
-  ): Promise<Variasi[]> {
+  async variasis(args: Prisma.VariasiFindManyArgs): Promise<PrismaVariasi[]> {
     return this.prisma.variasi.findMany(args);
   }
-  async findOne<T extends Prisma.VariasiFindUniqueArgs>(
-    args: Prisma.SelectSubset<T, Prisma.VariasiFindUniqueArgs>
-  ): Promise<Variasi | null> {
+  async variasi(
+    args: Prisma.VariasiFindUniqueArgs
+  ): Promise<PrismaVariasi | null> {
     return this.prisma.variasi.findUnique(args);
   }
-  async create<T extends Prisma.VariasiCreateArgs>(
-    args: Prisma.SelectSubset<T, Prisma.VariasiCreateArgs>
-  ): Promise<Variasi> {
-    return this.prisma.variasi.create<T>(args);
+  async createVariasi(args: Prisma.VariasiCreateArgs): Promise<PrismaVariasi> {
+    return this.prisma.variasi.create(args);
   }
-  async update<T extends Prisma.VariasiUpdateArgs>(
-    args: Prisma.SelectSubset<T, Prisma.VariasiUpdateArgs>
-  ): Promise<Variasi> {
-    return this.prisma.variasi.update<T>(args);
+  async updateVariasi(args: Prisma.VariasiUpdateArgs): Promise<PrismaVariasi> {
+    return this.prisma.variasi.update(args);
   }
-  async delete<T extends Prisma.VariasiDeleteArgs>(
-    args: Prisma.SelectSubset<T, Prisma.VariasiDeleteArgs>
-  ): Promise<Variasi> {
+  async deleteVariasi(args: Prisma.VariasiDeleteArgs): Promise<PrismaVariasi> {
     return this.prisma.variasi.delete(args);
   }
 
   async findProducts(
     parentId: string,
     args: Prisma.ProductFindManyArgs
-  ): Promise<Product[]> {
+  ): Promise<PrismaProduct[]> {
     return this.prisma.variasi
       .findUniqueOrThrow({
         where: { id: parentId },
